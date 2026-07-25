@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Excursión a Antigua Guatemala</title>
+  <title>Hoja de Trabajo 1</title>
 </head>
 <body>
 
@@ -34,10 +34,10 @@
 
   <section id="galeria">
     <h2>Galería de imágenes</h2>
-    <img src="imagen1.jpg" alt="Vista del Arco de Santa Catalina" width="300">
-    <img src="imagen2.jpg" alt="Volcán de Agua desde Antigua Guatemala" width="300">
-    <img src="imagen3.jpg" alt="Iglesia colonial en Antigua Guatemala" width="300">
-    <img src="imagen4.jpg" alt="Calles empedradas de Antigua Guatemala" width="300">
+    <img src="./img/img1.jpg" alt="Vista del Arco de Santa Catalina" width="300">
+    <img src="./img/img2.jpg" alt="Volcán de Agua desde Antigua Guatemala" width="300">
+    <img src="./img/img3.jpg" alt="Iglesia colonial en Antigua Guatemala" width="300">
+    <img src="./img/img4.jpg" alt="Calles empedradas de Antigua Guatemala" width="300">
   </section>
 
   <section id="itinerario">
@@ -98,7 +98,7 @@
   </section>
 
   <footer>
-    <p>Desarrollado por: [Nombre del estudiante]</p>
+    <p>Desarrollo Web 2026 - Javier Pirir</p>
   </footer>
 
 </body>
