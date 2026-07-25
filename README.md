@@ -10,5 +10,8 @@ actividades adicionales que se pueden realizar en el destino.
 ## Sitio publicado
 https://david21p.github.io/Desarrollo_Web/
 
+## Netlify
+https://6a6441bfe17381ea12647c00--friendly-meringue-04913d.netlify.app/
+
 ## Autor
 Javier Pirir
