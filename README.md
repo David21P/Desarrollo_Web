@@ -9,7 +9,7 @@ nivel estructural, sin procesamiento real de la información, preparando el
 DOM para futuras fases del curso.
 
 ## Sitio publicado
-https://[tu-sitio].netlify.app/
+https://github.com/David21P/Desarrollo_Web/tree/Tarea1
 
 ## Netlify
 https://6a657f0aa77bc9da4416ccbd--david21p-hoja-trabajo-1.netlify.app/
