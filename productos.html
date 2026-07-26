@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ferretería El Tornillo - Productos</title>
+</head>
+<body>
+
+  <header>
+    <h1>Ferretería El Tornillo</h1>
+  </header>
+
+  <nav>
+    <ul>
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="categorias.html">Categorías</a></li>
+      <li><a href="productos.html">Productos</a></li>
+      <li><a href="ofertas.html">Ofertas</a></li>
+      <li><a href="ubicaciones.html">Ubicaciones</a></li>
+      <li><a href="contacto.html">Contacto</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <h2>Catálogo de productos</h2>
+
+    <form action="#" method="get">
+      <label for="buscar">Buscar producto:</label>
+      <input type="text" id="buscar" name="buscar" placeholder="Ej. martillo">
+
+      <label for="categoria">Categoría:</label>
+      <select id="categoria" name="categoria">
+        <option value="todas">Todas</option>
+        <option value="manuales">Herramientas manuales</option>
+        <option value="electricas">Herramientas eléctricas</option>
+        <option value="plomeria">Plomería</option>
+        <option value="electricidad">Electricidad</option>
+        <option value="pintura">Pintura</option>
+        <option value="jardineria">Jardinería</option>
+      </select>
+
+      <button type="submit">Buscar</button>
+    </form>
+
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Categoría</th>
+          <th>Precio</th>
+          <th>Disponibilidad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Martillo de uña 16 oz</td>
+          <td>Herramientas manuales</td>
+          <td>Q45.00</td>
+          <td>Disponible</td>
+        </tr>
+        <tr>
+          <td>Taladro eléctrico 1/2"</td>
+          <td>Herramientas eléctricas</td>
+          <td>Q450.00</td>
+          <td>Disponible</td>
+        </tr>
+        <tr>
+          <td>Tubo PVC 1/2" (6m)</td>
+          <td>Plomería</td>
+          <td>Q35.00</td>
+          <td>Disponible</td>
+        </tr>
+        <tr>
+          <td>Cable eléctrico #12 (metro)</td>
+          <td>Electricidad</td>
+          <td>Q8.50</td>
+          <td>Disponible</td>
+        </tr>
+        <tr>
+          <td>Pintura de aceite (galón)</td>
+          <td>Pintura</td>
+          <td>Q180.00</td>
+          <td>Agotado</td>
+        </tr>
+        <tr>
+          <td>Manguera de jardín 15m</td>
+          <td>Jardinería</td>
+          <td>Q120.00</td>
+          <td>Disponible</td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+
+  <footer>
+    <p>Desarrollado por: [Nombre completo del estudiante] - Carnet: [Número de carnet]</p>
+  </footer>
+
+</body>
+</html>
