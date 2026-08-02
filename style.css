@@ -1,0 +1,197 @@
+/* Excursión a Antigua Guatemala - estilos */
+
+body {
+  margin: 0;
+  font-family: Georgia, serif;
+  background-color: #faf5e9;
+  color: #332a22;
+  line-height: 1.6;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: #c9a227;
+  color: #332a22;
+  padding: 10px;
+}
+
+.skip-link:focus {
+  left: 10px;
+  top: 10px;
+}
+
+/* Encabezado */
+
+.site-header {
+  background-color: #a85c32;
+  color: white;
+  text-align: center;
+  padding: 40px 20px;
+  border-bottom: 5px solid #c9a227;
+}
+
+.site-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 32px;
+}
+
+.site-header .tagline {
+  font-style: italic;
+  margin: 0;
+}
+
+/* Navegación */
+
+.site-nav {
+  background-color: #efe4cf;
+  border-bottom: 3px solid #a85c32;
+  padding: 10px;
+  text-align: center;
+}
+
+.site-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-nav li {
+  display: inline-block;
+  margin: 0 10px;
+}
+
+.site-nav a {
+  color: #7c4224;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.site-nav a:hover {
+  color: #c9a227;
+  text-decoration: underline;
+}
+
+/* Contenido general */
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+section {
+  padding: 30px 0;
+  border-bottom: 1px solid #e0d3b5;
+}
+
+h2 {
+  color: #7c4224;
+  font-size: 26px;
+  border-bottom: 3px solid #c9a227;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+/* Galería */
+
+.gallery {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.gallery figure {
+  display: inline-block;
+  width: 200px;
+  margin: 10px;
+  background-color: white;
+  border: 1px solid #e0d3b5;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.gallery img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.gallery figcaption {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #7c4224;
+}
+
+/* Tabla de itinerario */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  margin-top: 15px;
+}
+
+caption {
+  text-align: left;
+  font-style: italic;
+  margin-bottom: 8px;
+}
+
+th, td {
+  border: 1px solid #e0d3b5;
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #a85c32;
+  color: white;
+}
+
+tr:nth-child(even) {
+  background-color: #efe4cf;
+}
+
+/* Lista de actividades */
+
+.activity-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 15px;
+}
+
+.activity-list li {
+  background-color: white;
+  border-left: 5px solid #5b6e4e;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+}
+
+/* Pie de página */
+
+.site-footer {
+  background-color: #332a22;
+  color: white;
+  text-align: center;
+  padding: 15px;
+}
+
+/* Responsivo */
+
+@media (max-width: 600px) {
+  .site-header h1 {
+    font-size: 24px;
+  }
+
+  .gallery figure {
+    width: 45%;
+    margin: 5px;
+  }
+
+  th, td {
+    padding: 6px;
+    font-size: 14px;
+  }
+}
