@@ -13,8 +13,8 @@ mediante media queries para tablet y móvil.
 ## Sitio publicado
 https://github.com/David21P/Desarrollo_Web
 
-## Sitio publicado
-
+## Netlify
+https://glowing-melomakarona-0850d4.netlify.app/
 
 ## Autor
 Javier Pirir
