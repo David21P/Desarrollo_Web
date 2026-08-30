@@ -1,18 +1,21 @@
-# Tarea 1 - Prototipo de Tienda en Línea (Ferretería El Tornillo)
+# Tarea 2 - Tienda en Línea con React y Bootstrap (Ferretería El Tornillo)
 
 ## Descripción del proyecto
-Prototipo de tienda en línea desarrollado únicamente con HTML nativo (sin CSS,
-frameworks ni JavaScript), correspondiente a una ferretería. El sitio cuenta
-con 6 páginas: Inicio, Categorías, Productos, Ofertas, Ubicaciones y Contacto.
-Incluye formularios de captura de datos (búsqueda, suscripción y contacto) a
-nivel estructural, sin procesamiento real de la información, preparando el
-DOM para futuras fases del curso.
+Evolución del prototipo HTML de la Tarea 1: la tienda en línea de la
+ferretería se reconstruyó como una aplicación React componentizada, usando
+React-Bootstrap para el diseño y la disposición responsiva. El sitio
+mantiene las mismas 6 secciones (Inicio, Categorías, Productos, Ofertas,
+Ubicaciones y Contacto), navegables mediante React Router y una Navbar
+global. Incluye un Carousel de promociones y una cuadrícula de Cards en el
+Inicio, un Accordion con Badge y ListGroup en Categorías, una Table con
+Badge y Modal de ficha técnica en Productos, una Table con Badge de
+descuento en Ofertas, ListGroup con Badge en Ubicaciones, y un formulario
+controlado con Alert de confirmación en Contacto. El Footer es un
+componente reutilizable presente en toda la aplicación.
 
 ## Sitio publicado
-https://github.com/David21P/Desarrollo_Web/tree/Tarea1
 
-## Netlify
-https://6a657f0aa77bc9da4416ccbd--david21p-hoja-trabajo-1.netlify.app/
 
 ## Autor
-Javier Pirir
+Javier Pirir - Carnet: 9490-22-15282
+
