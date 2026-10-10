@@ -1,29 +1,68 @@
-# Tarea 3 - Tienda en Línea con Autenticación (Ferretería El Tornillo)
+# Tarea 4 - Backend con Node.js, Express y MongoDB (Ferretería El Tornillo)
 
 ## Descripción del proyecto
-Evolución del proyecto de la Tarea 2: se agregó un flujo de autenticación
-simulada (Login / Logout / Perfil) mediante una arquitectura de estado
-global, para que la sesión del usuario se comparta en toda la aplicación
-sin pasar props manualmente entre componentes. El Login valida que los
-campos no estén vacíos y registra la sesión con datos estructurados
-(nombre, correo, rol y fecha de acceso). La Navbar reacciona en tiempo real
-al estado de sesión, mostrando "Iniciar sesión" o el nombre del usuario
-activo con acceso a su perfil y botón de cerrar sesión. La vista de Perfil
-muestra los datos de sesión usando Card, Badge y ListGroup de
-React-Bootstrap, con opción de cerrar sesión desde ahí mismo.
+Evolución del proyecto de la Tarea 3: se conectó el frontend de React a un
+backend real construido con Node.js, Express y MongoDB Atlas, reemplazando
+la autenticación simulada y los datos estáticos de productos por una API
+REST completa con persistencia real en base de datos.
 
-## Tecnología de estado seleccionada: Opción A - Context API + useReducer
-Se eligió `useContext` + `useReducer` en lugar de Redux Toolkit porque el
-alcance del estado global en este proyecto es pequeño (solo la sesión del
-usuario), y React ya trae estas herramientas nativas — no hace falta una
-librería externa ni la configuración adicional de una tienda Redux para un
-caso de uso tan acotado. `AuthContext.jsx` centraliza el `useReducer` en un
-`AuthProvider`, y expone el estado y el `dispatch` mediante el hook
-personalizado `useAuth()`. El reducer gestiona 4 acciones: `LOGIN`,
-`LOGOUT`, `LOGIN_ERROR` y `CLEAR_ERROR`.
+La entidad principal gestionada es **Producto** (herramientas, materiales
+y artículos de la ferretería), además de un sistema de registro e inicio
+de sesión de usuarios con contraseñas cifradas (bcrypt).
 
-## Sitio publicado
-https://ferreteriahoja3j.netlify.app
+## Arquitectura del backend
+El backend sigue una estructura modular tipo MVC, separada en:
+
+backend/
+├── config/
+│ └── db.js # Conexión a MongoDB Atlas con manejo de errores
+├── models/
+│ ├── User.js # Esquema de usuario (nombre, correo, contraseña, rol)
+│ └── Producto.js # Esquema de producto (nombre, categoría, precio, disponible)
+├── controllers/
+│ ├── authController.js # Lógica de registro e inicio de sesión
+│ └── productoController.js # Lógica CRUD de productos
+├── routes/
+│ ├── authRoutes.js # Rutas /api/auth
+│ └── productoRoutes.js # Rutas /api/recursos
+├── server.js # Punto de entrada: Express, middlewares, conexión a DB
+├── .env.example # Plantilla de variables de entorno (sin datos reales)
+└── ferreteria-api.postman_collection.json # Colección de Postman con todos los endpoints
+
+
+Las contraseñas se almacenan cifradas con **bcrypt**, y las variables
+sensibles (cadena de conexión a MongoDB) se manejan con **dotenv**,
+nunca subidas al repositorio (`.env` está en `.gitignore`).
+
+## Endpoints disponibles
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Registra un nuevo usuario |
+| POST | `/api/auth/login` | Inicia sesión y valida credenciales |
+| GET | `/api/recursos` | Lista todos los productos (admite filtros `?categoria=` y `?nombre=`) |
+| GET | `/api/recursos/:id` | Obtiene un producto por su ID |
+| POST | `/api/recursos` | Crea un nuevo producto |
+| PUT | `/api/recursos/:id` | Actualiza un producto existente |
+| DELETE | `/api/recursos/:id` | Elimina un producto |
+
+La colección completa de Postman con ejemplos de cada petición está en
+`backend/ferreteria-api.postman_collection.json`.
+
+## Sitios publicados
+- **Frontend (Netlify):** https://ferreteriatarea4j.netlify.app
+- **Backend (Render):** https://ferreteria-backend-ah51.onrender.com
+
+> Nota: el backend está en un plan gratuito de Render, por lo que puede
+> tardar entre 30 y 50 segundos en responder la primera petición después
+> de un período de inactividad.
+
+## Tecnologías utilizadas
+- **Frontend:** React, React Router, React-Bootstrap, Vite
+- **Backend:** Node.js, Express, Mongoose
+- **Base de datos:** MongoDB Atlas (plan gratuito M0)
+- **Autenticación:** bcrypt para cifrado de contraseñas
+- **Despliegue:** Netlify (frontend) y Render (backend)
 
 ## Autor
 Javier Pirir - Carnet: 9490-22-15282

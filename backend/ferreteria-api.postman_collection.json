@@ -1,0 +1,231 @@
+{
+  "info": {
+    "_postman_id": "2e7dac2f-e4b7-4a2c-aeaa-adddac4052bb",
+    "name": "Ferretería El Tornillo API - Tarea 4",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "34230134"
+  },
+  "item": [
+    {
+      "name": "Registrar usuario",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "   {\r\n     \"nombre\": \"Usuario de Prueba\",\r\n     \"correo\": \"prueba@correo.com\",\r\n     \"contrasena\": \"123456\"\r\n   }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/register",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Iniciar sesión",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "  {\r\n    \"correo\": \"prueba@correo.com\",\r\n    \"contrasena\": \"123456\"\r\n  }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar productos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/recursos",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "recursos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Filtrar por categoría",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/recursos?categoria=Plomería",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "recursos"
+          ],
+          "query": [
+            {
+              "key": "categoria",
+              "value": "Plomería"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Obtener producto por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/recursos/6ac9d26a251aa5d40776ac15",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "recursos",
+            "6ac9d26a251aa5d40776ac15"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Crear producto",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "  {\r\n    \"nombre\": \"Pintura de aceite\",\r\n    \"categoria\": \"Pintura\",\r\n    \"precio\": 180,\r\n    \"disponible\": true\r\n  }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/recursos",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "recursos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Actualizar producto",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "  {\r\n    \"precio\": 165,\r\n    \"disponible\": false\r\n  }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/recursos/6ac9df0bdc94b3b538b5552d",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "recursos",
+            "6ac9df0bdc94b3b538b5552d"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Eliminar producto",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/recursos/6ac9df0bdc94b3b538b5552d",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "recursos",
+            "6ac9df0bdc94b3b538b5552d"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": ""
+    }
+  ]
+}
