@@ -1,34 +1,55 @@
 import { useState } from "react";
-import { Container, Form, Button, Alert } from "react-bootstrap";
+import { Container, Form, Button, Alert, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 
+const API_URL = "http://localhost:5000/api/auth/login";
+
 function Login() {
-  const [nombre, setNombre] = useState("");
   const [correo, setCorreo] = useState("");
+  const [contrasena, setContrasena] = useState("");
+  const [cargando, setCargando] = useState(false);
   const { estado, dispatch } = useAuth();
   const navigate = useNavigate();
 
-  const manejarEnvio = (evento) => {
+  const manejarEnvio = async (evento) => {
     evento.preventDefault();
 
-    if (nombre.trim() === "" || correo.trim() === "") {
-      dispatch({ type: "LOGIN_ERROR", payload: "Completa tu nombre y correo para continuar." });
+    if (correo.trim() === "" || contrasena.trim() === "") {
+      dispatch({ type: "LOGIN_ERROR", payload: "Completa tu correo y contraseña para continuar." });
       return;
     }
 
-    // Autenticación simulada: no hay backend real
-    dispatch({
-      type: "LOGIN",
-      payload: {
-        nombre: nombre.trim(),
-        correo: correo.trim(),
-        rol: "Cliente",
-        fechaAcceso: new Date().toLocaleString("es-GT"),
-      },
-    });
+    setCargando(true);
 
-    navigate("/perfil");
+    try {
+      const respuesta = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ correo: correo.trim(), contrasena }),
+      });
+
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        dispatch({ type: "LOGIN_ERROR", payload: datos.mensaje || "No se pudo iniciar sesión." });
+        return;
+      }
+
+      dispatch({
+        type: "LOGIN",
+        payload: {
+          ...datos,
+          fechaAcceso: new Date().toLocaleString("es-GT"),
+        },
+      });
+
+      navigate("/perfil");
+    } catch (err) {
+      dispatch({ type: "LOGIN_ERROR", payload: "No se pudo conectar con el servidor." });
+    } finally {
+      setCargando(false);
+    }
   };
 
   return (
@@ -39,15 +60,6 @@ function Login() {
 
       <Form onSubmit={manejarEnvio}>
         <Form.Group className="mb-3">
-          <Form.Label>Nombre completo</Form.Label>
-          <Form.Control
-            type="text"
-            value={nombre}
-            onChange={(evento) => setNombre(evento.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
           <Form.Label>Correo electrónico</Form.Label>
           <Form.Control
             type="email"
@@ -56,8 +68,17 @@ function Login() {
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit">
-          Entrar
+        <Form.Group className="mb-3">
+          <Form.Label>Contraseña</Form.Label>
+          <Form.Control
+            type="password"
+            value={contrasena}
+            onChange={(evento) => setContrasena(evento.target.value)}
+          />
+        </Form.Group>
+
+        <Button variant="primary" type="submit" disabled={cargando}>
+          {cargando ? <Spinner animation="border" size="sm" /> : "Entrar"}
         </Button>
       </Form>
     </Container>
