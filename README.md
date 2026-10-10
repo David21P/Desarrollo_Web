@@ -1,21 +1,29 @@
-# Tarea 2 - Tienda en Línea con React y Bootstrap (Ferretería El Tornillo)
+# Tarea 3 - Tienda en Línea con Autenticación (Ferretería El Tornillo)
 
 ## Descripción del proyecto
-Evolución del prototipo HTML de la Tarea 1: la tienda en línea de la
-ferretería se reconstruyó como una aplicación React componentizada, usando
-React-Bootstrap para el diseño y la disposición responsiva. El sitio
-mantiene las mismas 6 secciones (Inicio, Categorías, Productos, Ofertas,
-Ubicaciones y Contacto), navegables mediante React Router y una Navbar
-global. Incluye un Carousel de promociones y una cuadrícula de Cards en el
-Inicio, un Accordion con Badge y ListGroup en Categorías, una Table con
-Badge y Modal de ficha técnica en Productos, una Table con Badge de
-descuento en Ofertas, ListGroup con Badge en Ubicaciones, y un formulario
-controlado con Alert de confirmación en Contacto. El Footer es un
-componente reutilizable presente en toda la aplicación.
+Evolución del proyecto de la Tarea 2: se agregó un flujo de autenticación
+simulada (Login / Logout / Perfil) mediante una arquitectura de estado
+global, para que la sesión del usuario se comparta en toda la aplicación
+sin pasar props manualmente entre componentes. El Login valida que los
+campos no estén vacíos y registra la sesión con datos estructurados
+(nombre, correo, rol y fecha de acceso). La Navbar reacciona en tiempo real
+al estado de sesión, mostrando "Iniciar sesión" o el nombre del usuario
+activo con acceso a su perfil y botón de cerrar sesión. La vista de Perfil
+muestra los datos de sesión usando Card, Badge y ListGroup de
+React-Bootstrap, con opción de cerrar sesión desde ahí mismo.
+
+## Tecnología de estado seleccionada: Opción A - Context API + useReducer
+Se eligió `useContext` + `useReducer` en lugar de Redux Toolkit porque el
+alcance del estado global en este proyecto es pequeño (solo la sesión del
+usuario), y React ya trae estas herramientas nativas — no hace falta una
+librería externa ni la configuración adicional de una tienda Redux para un
+caso de uso tan acotado. `AuthContext.jsx` centraliza el `useReducer` en un
+`AuthProvider`, y expone el estado y el `dispatch` mediante el hook
+personalizado `useAuth()`. El reducer gestiona 4 acciones: `LOGIN`,
+`LOGOUT`, `LOGIN_ERROR` y `CLEAR_ERROR`.
 
 ## Sitio publicado
-https://illustrious-truffle-bc3de5.netlify.app/
+
 
 ## Autor
 Javier Pirir - Carnet: 9490-22-15282
-

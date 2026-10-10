@@ -11,7 +11,7 @@ function Footer() {
         </Row>
         <Row>
           <Col className="text-center mt-2">
-            <small>&copy; 2026 Ferretería El Tornillo</small>
+            <small>&copy; 2026 Ferreteria El Tornillo</small>
           </Col>
         </Row>
       </Container>

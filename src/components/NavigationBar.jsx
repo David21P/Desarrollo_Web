@@ -1,7 +1,16 @@
-import { Navbar, Nav, Container } from "react-bootstrap";
-import { NavLink } from "react-router-dom";
+import { Navbar, Nav, Container, Button } from "react-bootstrap";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 
 function NavigationBar() {
+  const { estado, dispatch } = useAuth();
+  const navigate = useNavigate();
+
+  const cerrarSesion = () => {
+    dispatch({ type: "LOGOUT" });
+    navigate("/");
+  };
+
   return (
     <Navbar expand="lg" className="navbar-tienda" variant="dark" sticky="top">
       <Container>
@@ -29,6 +38,23 @@ function NavigationBar() {
             <Nav.Link as={NavLink} to="/contacto">
               Contacto
             </Nav.Link>
+          </Nav>
+
+          <Nav>
+            {estado.isAuthenticated ? (
+              <>
+                <Nav.Link as={NavLink} to="/perfil">
+                  Hola, {estado.usuario.nombre}
+                </Nav.Link>
+                <Button variant="outline-light" size="sm" onClick={cerrarSesion}>
+                  Cerrar sesión
+                </Button>
+              </>
+            ) : (
+              <Nav.Link as={NavLink} to="/login">
+                Iniciar sesión
+              </Nav.Link>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>
