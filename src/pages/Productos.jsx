@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Container, Table, Badge, Button, Modal, Form, Alert, Spinner } from "react-bootstrap";
 
-const API_URL = "http://localhost:5000/api/recursos";
+const API_URL = `${import.meta.env.VITE_API_URL}/recursos`;
 
 function Productos() {
   const [productos, setProductos] = useState([]);
