@@ -10,25 +10,66 @@ La entidad principal gestionada es **Producto** (herramientas, materiales
 y artículos de la ferretería), además de un sistema de registro e inicio
 de sesión de usuarios con contraseñas cifradas (bcrypt).
 
+## Entidad utilizada: Producto
+Se eligió **Producto** como entidad de negocio para mantener la temática de
+la ferretería usada en las tareas anteriores. Cada producto se guarda en
+MongoDB con los siguientes campos:
+
+- `nombre`: nombre del producto (obligatorio)
+- `categoria`: categoría a la que pertenece, por ejemplo "Plomería" (obligatorio)
+- `precio`: precio en quetzales (obligatorio)
+- `disponible`: indica si el producto está disponible o agotado
+- `createdAt` y `updatedAt`: fechas generadas automáticamente
+
+## Autenticación de usuarios
+La autenticación se resuelve a nivel de endpoints de la API:
+
+- **Registro:** `POST /api/auth/register` crea el usuario en MongoDB con su
+  nombre, correo, contraseña cifrada con bcrypt y rol (`cliente` por defecto).
+- **Validación de usuario:** `POST /api/auth/login` compara el correo y la
+  contraseña contra la base de datos.
+
+En la página web, el inicio de sesión usa este endpoint: si el usuario está
+registrado, ingresa y se muestra su perfil con los datos reales guardados en
+la base de datos; si no está registrado o la contraseña es incorrecta, se
+muestra el mensaje de error "Credenciales inválidas.".
+
+El frontend no incluye una pantalla de registro: los usuarios nuevos se
+crean enviando la petición de registro a la API (ver la colección de Postman,
+peticiones "Registrar usuario" e "Iniciar sesión").
+
+## CRUD de Productos
+El CRUD completo está implementado sobre la entidad **Producto** y se puede
+usar de dos formas:
+
+- **Desde la interfaz web (página Productos):** las opciones de escritura
+  disponibles son **Agregar producto** (formulario en modal), **Editar** y
+  **Eliminar** (con confirmación). La tabla muestra los productos leídos
+  directamente desde la API, con indicadores de carga y de error.
+- **Desde las peticiones de Postman:** la colección incluye las peticiones
+  para listar, filtrar por categoría, obtener por ID, crear, actualizar y
+  eliminar productos.
+
 ## Arquitectura del backend
 El backend sigue una estructura modular tipo MVC, separada en:
 
+```
 backend/
 ├── config/
-│ └── db.js # Conexión a MongoDB Atlas con manejo de errores
+│   └── db.js                 # Conexión a MongoDB Atlas con manejo de errores
 ├── models/
-│ ├── User.js # Esquema de usuario (nombre, correo, contraseña, rol)
-│ └── Producto.js # Esquema de producto (nombre, categoría, precio, disponible)
+│   ├── User.js                # Esquema de usuario (nombre, correo, contraseña, rol)
+│   └── Producto.js            # Esquema de producto (nombre, categoría, precio, disponible)
 ├── controllers/
-│ ├── authController.js # Lógica de registro e inicio de sesión
-│ └── productoController.js # Lógica CRUD de productos
+│   ├── authController.js      # Lógica de registro e inicio de sesión
+│   └── productoController.js  # Lógica CRUD de productos
 ├── routes/
-│ ├── authRoutes.js # Rutas /api/auth
-│ └── productoRoutes.js # Rutas /api/recursos
-├── server.js # Punto de entrada: Express, middlewares, conexión a DB
-├── .env.example # Plantilla de variables de entorno (sin datos reales)
-└── ferreteria-api.postman_collection.json # Colección de Postman con todos los endpoints
-
+│   ├── authRoutes.js          # Rutas /api/auth
+│   └── productoRoutes.js      # Rutas /api/recursos
+├── server.js                  # Punto de entrada: Express, middlewares, conexión a DB
+├── .env.example                # Plantilla de variables de entorno (sin datos reales)
+└── ferreteria-api.postman_collection.json  # Colección de Postman con todos los endpoints
+```
 
 Las contraseñas se almacenan cifradas con **bcrypt**, y las variables
 sensibles (cadena de conexión a MongoDB) se manejan con **dotenv**,
@@ -63,6 +104,15 @@ La colección completa de Postman con ejemplos de cada petición está en
 - **Base de datos:** MongoDB Atlas (plan gratuito M0)
 - **Autenticación:** bcrypt para cifrado de contraseñas
 - **Despliegue:** Netlify (frontend) y Render (backend)
+
+## Credenciales de prueba
+Para probar el inicio de sesión real desde el frontend, puede usar:
+- **Correo:** javier@correo.com
+- **Contraseña:** 123456
+
+También puede registrar un usuario nuevo directamente contra la API
+usando el endpoint `POST /api/auth/register` (ver la colección de
+Postman en `backend/ferreteria-api.postman_collection.json`).
 
 ## Autor
 Javier Pirir - Carnet: 9490-22-15282
