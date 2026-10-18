@@ -1,8 +1,9 @@
 // Productos.jsx
 import { useState, useEffect } from "react";
 import { Container, Table, Badge, Button, Modal, Form, Alert, Spinner } from "react-bootstrap";
+import { apiFetch } from "../api/apiClient.js";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/recursos`;
+const RUTA = "/recursos";
 
 function Productos() {
   const [productos, setProductos] = useState([]);
@@ -25,7 +26,7 @@ function Productos() {
     setCargando(true);
     setError(null);
     try {
-      const respuesta = await fetch(API_URL);
+      const respuesta = await apiFetch(RUTA);
       if (!respuesta.ok) throw new Error("No se pudieron cargar los productos.");
       const datos = await respuesta.json();
       setProductos(datos);
@@ -84,11 +85,10 @@ function Productos() {
     };
 
     try {
-      const respuesta = await fetch(
-        modoEdicion ? `${API_URL}/${idEdicion}` : API_URL,
+      const respuesta = await apiFetch(
+        modoEdicion ? `${RUTA}/${idEdicion}` : RUTA,
         {
           method: modoEdicion ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(cuerpo),
         }
       );
@@ -107,7 +107,7 @@ function Productos() {
     if (!confirmar) return;
 
     try {
-      const respuesta = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      const respuesta = await apiFetch(`${RUTA}/${id}`, { method: "DELETE" });
       if (!respuesta.ok) throw new Error("No se pudo eliminar el producto.");
       cargarProductos();
     } catch (err) {
