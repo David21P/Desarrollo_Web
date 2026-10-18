@@ -1,118 +1,130 @@
-# Tarea 4 - Backend con Node.js, Express y MongoDB (Ferretería El Tornillo)
+# Tarea 5 - Seguridad con JWT (Ferretería El Tornillo)
 
-## Descripción del proyecto
-Evolución del proyecto de la Tarea 3: se conectó el frontend de React a un
-backend real construido con Node.js, Express y MongoDB Atlas, reemplazando
-la autenticación simulada y los datos estáticos de productos por una API
-REST completa con persistencia real en base de datos.
+Evolución de la Tarea 4: la API ahora usa **autenticación stateless con JSON Web Tokens (JWT)**. El login devuelve un token que expira a los **5 minutos**, el backend protege las rutas de escritura con un middleware, y el frontend adjunta el token automáticamente y cierra la sesión cuando el servidor responde 401.
 
-La entidad principal gestionada es **Producto** (herramientas, materiales
-y artículos de la ferretería), además de un sistema de registro e inicio
-de sesión de usuarios con contraseñas cifradas (bcrypt).
+## Enlaces
+
+- Repositorio: https://github.com/David21P/Desarrollo_Web (rama `Tarea5`)
+- Frontend (Netlify): https://ferreteriatarea5j.netlify.app
+- Backend (Render): https://ferreteria-backend-tarea5.onrender.com
 
 ## Entidad utilizada: Producto
-Se eligió **Producto** como entidad de negocio para mantener la temática de
-la ferretería usada en las tareas anteriores. Cada producto se guarda en
-MongoDB con los siguientes campos:
 
-- `nombre`: nombre del producto (obligatorio)
-- `categoria`: categoría a la que pertenece, por ejemplo "Plomería" (obligatorio)
-- `precio`: precio en quetzales (obligatorio)
-- `disponible`: indica si el producto está disponible o agotado
-- `createdAt` y `updatedAt`: fechas generadas automáticamente
+La entidad de negocio es **Producto** (`nombre`, `categoria`, `precio`, `disponible`). Se administra con un CRUD completo, tanto desde la interfaz web como con requests directos a la API (ver colección de Postman).
 
 ## Autenticación de usuarios
-La autenticación se resuelve a nivel de endpoints de la API:
 
-- **Registro:** `POST /api/auth/register` crea el usuario en MongoDB con su
-  nombre, correo, contraseña cifrada con bcrypt y rol (`cliente` por defecto).
-- **Validación de usuario:** `POST /api/auth/login` compara el correo y la
-  contraseña contra la base de datos.
+- `POST /api/auth/register`: registra un usuario (contraseña cifrada con bcrypt).
+- `POST /api/auth/login`: valida las credenciales y **devuelve un JWT** junto con los datos del usuario.
+- En la interfaz, si el usuario está registrado ingresa a su perfil; si no, se muestra un error.
 
-En la página web, el inicio de sesión usa este endpoint: si el usuario está
-registrado, ingresa y se muestra su perfil con los datos reales guardados en
-la base de datos; si no está registrado o la contraseña es incorrecta, se
-muestra el mensaje de error "Credenciales inválidas.".
+## Cómo funciona el JWT
 
-El frontend no incluye una pantalla de registro: los usuarios nuevos se
-crean enviando la petición de registro a la API (ver la colección de Postman,
-peticiones "Registrar usuario" e "Iniciar sesión").
+### Backend
 
-## CRUD de Productos
-El CRUD completo está implementado sobre la entidad **Producto** y se puede
-usar de dos formas:
+- **Configuración en `.env`** (nunca se sube al repositorio; solo existe `backend/.env.example` con valores de relleno):
 
-- **Desde la interfaz web (página Productos):** las opciones de escritura
-  disponibles son **Agregar producto** (formulario en modal), **Editar** y
-  **Eliminar** (con confirmación). La tabla muestra los productos leídos
-  directamente desde la API, con indicadores de carga y de error.
-- **Desde las peticiones de Postman:** la colección incluye las peticiones
-  para listar, filtrar por categoría, obtener por ID, crear, actualizar y
-  eliminar productos.
+```
+  JWT_SECRET=clave_secreta_larga_y_aleatoria
+  JWT_EXPIRES_IN=5m
+```
+
+- **Firma del token** (`controllers/authController.js`): al iniciar sesión se genera el token con `jwt.sign`, con payload `{ id, email, role }` y expiración tomada de `JWT_EXPIRES_IN` (5 minutos):
+
+```javascript
+  jwt.sign(
+    { id: usuario._id, email: usuario.correo, role: usuario.rol },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN }
+  );
+```
+
+- **Middleware reutilizable** (`middleware/authMiddleware.js`): lee el encabezado `Authorization: Bearer <token>` y verifica el token con `jwt.verify`.
+  - Sin encabezado o sin token: **401** `token_requerido`.
+  - Token vencido (`TokenExpiredError`): **401** con el JSON:
+
+```json
+    {
+      "error": "token_expired",
+      "message": "La sesión ha expirado o ya no es válida. Por favor, inicie sesión nuevamente."
+    }
+```
+
+  - Token inválido: **401** `token_invalido`.
+
+- **Rutas protegidas** (`routes/productoRoutes.js`): `POST`, `PUT` y `DELETE` de productos usan el middleware. Los `GET` quedan públicos para consultar el catálogo.
+
+### Frontend
+
+- **Almacenamiento del token:** al iniciar sesión, el usuario y su token se guardan en `localStorage` (clave `usuario`) y en el estado global (`AuthContext` con `useReducer`). Al recargar la página la sesión se conserva.
+- **Cliente HTTP centralizado** (`src/api/apiClient.js`): la función `apiFetch` agrega automáticamente `Authorization: Bearer <token>` a todas las peticiones a la API.
+- **Interceptor global de respuestas 401:** si la API responde 401, `apiFetch` borra el token y los datos del usuario de `localStorage` y emite el evento `sesion-expirada`.
+- **Cierre de sesión y redirección:** el `AuthProvider` escucha ese evento, ejecuta `dispatch({ type: "SESION_EXPIRADA" })` (equivalente a LOGOUT, con mensaje) y redirige a `/login` con `useNavigate`. La pantalla de login muestra un `Alert` con el texto: *"Su sesión ya no es válida o ha caducado. Por favor, inicie sesión nuevamente."*
+
+## Endpoints disponibles
+
+| Método | Ruta | Acceso | Descripción |
+|---|---|---|---|
+| POST | `/api/auth/register` | Público | Registrar usuario |
+| POST | `/api/auth/login` | Público | Iniciar sesión y obtener JWT |
+| GET | `/api/recursos` | Público | Listar productos (`?categoria=`, `?nombre=`) |
+| GET | `/api/recursos/:id` | Público | Obtener un producto |
+| POST | `/api/recursos` | **Protegido (JWT)** | Crear producto |
+| PUT | `/api/recursos/:id` | **Protegido (JWT)** | Actualizar producto |
+| DELETE | `/api/recursos/:id` | **Protegido (JWT)** | Eliminar producto |
+
+El rol del usuario viaja dentro del token; la autorización por rol (por ejemplo, solo `admin` puede modificar productos) queda como mejora futura.
 
 ## Arquitectura del backend
-El backend sigue una estructura modular tipo MVC, separada en:
 
 ```
 backend/
 ├── config/
-│   └── db.js                 # Conexión a MongoDB Atlas con manejo de errores
+│   └── db.js                  # Conexión a MongoDB
 ├── models/
-│   ├── User.js                # Esquema de usuario (nombre, correo, contraseña, rol)
-│   └── Producto.js            # Esquema de producto (nombre, categoría, precio, disponible)
+│   ├── User.js                # Esquema de usuario
+│   └── Producto.js            # Esquema de producto
 ├── controllers/
-│   ├── authController.js      # Lógica de registro e inicio de sesión
+│   ├── authController.js      # Registro e inicio de sesión (emite el JWT)
 │   └── productoController.js  # Lógica CRUD de productos
+├── middleware/
+│   └── authMiddleware.js      # Verificación del JWT (Bearer)
 ├── routes/
 │   ├── authRoutes.js          # Rutas /api/auth
 │   └── productoRoutes.js      # Rutas /api/recursos
-├── server.js                  # Punto de entrada: Express, middlewares, conexión a DB
-├── .env.example                # Plantilla de variables de entorno (sin datos reales)
-└── ferreteria-api.postman_collection.json  # Colección de Postman con todos los endpoints
+├── server.js                  # Punto de entrada
+├── .env.example               # Plantilla de variables de entorno
+└── ferreteria-api-tarea5.postman_collection.json
 ```
 
-Las contraseñas se almacenan cifradas con **bcrypt**, y las variables
-sensibles (cadena de conexión a MongoDB) se manejan con **dotenv**,
-nunca subidas al repositorio (`.env` está en `.gitignore`).
+## Colección de Postman
 
-## Endpoints disponibles
+Archivo: `backend/ferreteria-api-tarea5.postman_collection.json` (importar en Postman). Incluye las requests de la Tarea 4 y tres nuevas:
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Registra un nuevo usuario |
-| POST | `/api/auth/login` | Inicia sesión y valida credenciales |
-| GET | `/api/recursos` | Lista todos los productos (admite filtros `?categoria=` y `?nombre=`) |
-| GET | `/api/recursos/:id` | Obtiene un producto por su ID |
-| POST | `/api/recursos` | Crea un nuevo producto |
-| PUT | `/api/recursos/:id` | Actualiza un producto existente |
-| DELETE | `/api/recursos/:id` | Elimina un producto |
+1. **Tarea5 - Login (obtener token):** hace login y guarda el token en la variable `token` de la colección (script post-response).
+2. **Tarea5 - Crear producto (token válido):** `POST /api/recursos` con `Authorization: Bearer {{token}}`. Responde **201**.
+3. **Tarea5 - Crear producto (token expirado 401):** la misma petición enviada **más de 5 minutos después** del login. Responde **401** con `token_expired` (incluye un ejemplo guardado con la respuesta).
 
-La colección completa de Postman con ejemplos de cada petición está en
-`backend/ferreteria-api.postman_collection.json`.
+Para repetir la prueba: ejecutar el login, esperar 5 minutos sin volver a hacer login y enviar la request 3.
 
-## Sitios publicados
-- **Frontend (Netlify):** https://ferreteriatarea4j.netlify.app
-- **Backend (Render):** https://ferreteria-backend-ah51.onrender.com
+## Cómo probar en el sitio publicado
 
-> Nota: el backend está en un plan gratuito de Render, por lo que puede
-> tardar entre 30 y 50 segundos en responder la primera petición después
-> de un período de inactividad.
+1. Entrar a **Productos** sin sesión: la lista carga (GET público).
+2. Intentar **Agregar producto** sin sesión: redirige a `/login` con el aviso de sesión no válida.
+3. Iniciar sesión con las credenciales de prueba y agregar un producto: se guarda correctamente.
+4. Esperar 5 minutos e intentar guardar otro: la sesión se cierra y se redirige a `/login` con el mensaje de sesión caducada.
 
 ## Tecnologías utilizadas
-- **Frontend:** React, React Router, React-Bootstrap, Vite
-- **Backend:** Node.js, Express, Mongoose
-- **Base de datos:** MongoDB Atlas (plan gratuito M0)
-- **Autenticación:** bcrypt para cifrado de contraseñas
-- **Despliegue:** Netlify (frontend) y Render (backend)
+
+- **Backend:** Node.js, Express, MongoDB Atlas, Mongoose, bcryptjs, jsonwebtoken, dotenv, cors.
+- **Frontend:** React, Vite, React Router, React-Bootstrap, Context API + useReducer.
+- **Despliegue:** Render (backend) y Netlify (frontend).
 
 ## Credenciales de prueba
-Para probar el inicio de sesión real desde el frontend, puede usar:
-- **Correo:** javier@correo.com
-- **Contraseña:** 123456
 
-También puede registrar un usuario nuevo directamente contra la API
-usando el endpoint `POST /api/auth/register` (ver la colección de
-Postman en `backend/ferreteria-api.postman_collection.json`).
+- Correo: `javier@correo.com`
+- Contraseña: `123456`
 
-## Autor
-Javier Pirir - Carnet: 9490-22-15282
+
+Javier Pirir | 9490-22-15282 | David21P 
+Trabajo individual: backend (login con JWT, middleware de autenticación, protección de rutas), frontend (almacenamiento del token, cliente HTTP centralizado, interceptor 401, redirección), despliegue en Render y Netlify, colección de Postman y documentación. |
