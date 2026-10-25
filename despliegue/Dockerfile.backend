@@ -1,0 +1,16 @@
+FROM node:20-alpine
+WORKDIR /app
+
+# Instala solo las dependencias de producción
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# Copia el código (no incluye .env: se inyecta al ejecutar)
+COPY . .
+
+# Versión de la imagen, visible dentro del contenedor
+ARG APP_VERSION=desconocida
+ENV APP_VERSION=$APP_VERSION
+
+EXPOSE 5000
+CMD ["node", "server.js"]

@@ -1,0 +1,56 @@
+:root {
+  --adobe: #a85c32;
+  --adobe-dark: #7c4224;
+  --stone: #efe4cf;
+  --stone-light: #faf5e9;
+  --ink: #332a22;
+  --moss: #5b6e4e;
+  --gold: #c9a227;
+}
+
+body {
+  background-color: var(--stone-light);
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.btn-primary {
+  background-color: var(--adobe) !important;
+  border-color: var(--adobe) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--adobe-dark) !important;
+  border-color: var(--adobe-dark) !important;
+}
+
+.navbar-tienda {
+  background-color: var(--adobe) !important;
+}
+
+.navbar-tienda .nav-link {
+  color: #fff !important;
+}
+
+.navbar-tienda .nav-link.active {
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.footer-tienda {
+  background-color: var(--ink);
+  color: var(--stone-light);
+  padding: 1.5rem 1rem;
+}
+
+.hero-inicio {
+  background-color: var(--adobe);
+  color: #fff;
+  padding: 2.5rem 1rem;
+  text-align: center;
+}
+
+.badge-oferta {
+  background-color: var(--gold) !important;
+  color: var(--ink) !important;
+}
