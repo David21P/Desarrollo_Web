@@ -1,130 +1,157 @@
-# Tarea 5 - Seguridad con JWT (Ferretería El Tornillo)
+# Estrategias de despliegue con Docker: Ferretería El Tornillo
 
-Evolución de la Tarea 4: la API ahora usa **autenticación stateless con JSON Web Tokens (JWT)**. El login devuelve un token que expira a los **5 minutos**, el backend protege las rutas de escritura con un middleware, y el frontend adjunta el token automáticamente y cierra la sesión cuando el servidor responde 401.
+Manual práctico para desplegar la aplicación **Ferretería El Tornillo** con Docker usando tres estrategias: **Recreate**, **Blue-Green** y **Canary**.
 
-## Enlaces
+- **Autor:** Javier David Pirir Gómez (carnet 9490-22-15282)
+- **Curso:** Desarrollo Web, Universidad Mariano Gálvez de Guatemala
+- **Rama:** `Tarea6`
 
-- Repositorio: https://github.com/David21P/Desarrollo_Web (rama `Tarea5`)
-- Frontend (Netlify): https://ferreteriatarea5j.netlify.app
-- Backend (Render): https://ferreteria-backend-tarea5.onrender.com
+## Versiones de la aplicación
 
-## Entidad utilizada: Producto
+| Versión | Origen | Comportamiento |
+|---|---|---|
+| `v1` | Tarea 4 | API sin autenticación. `POST /api/recursos` sin token responde `201`. |
+| `v2` | Tarea 5 | API con JWT (expira en 5 min). `POST /api/recursos` sin token responde `401`. |
 
-La entidad de negocio es **Producto** (`nombre`, `categoria`, `precio`, `disponible`). Se administra con un CRUD completo, tanto desde la interfaz web como con requests directos a la API (ver colección de Postman).
+Ambas exponen `GET /api/version`, que devuelve la versión de la imagen en ejecución.
 
-## Autenticación de usuarios
-
-- `POST /api/auth/register`: registra un usuario (contraseña cifrada con bcrypt).
-- `POST /api/auth/login`: valida las credenciales y **devuelve un JWT** junto con los datos del usuario.
-- En la interfaz, si el usuario está registrado ingresa a su perfil; si no, se muestra un error.
-
-## Cómo funciona el JWT
-
-### Backend
-
-- **Configuración en `.env`** (nunca se sube al repositorio; solo existe `backend/.env.example` con valores de relleno):
+## Estructura
 
 ```
-  JWT_SECRET=clave_secreta_larga_y_aleatoria
-  JWT_EXPIRES_IN=5m
+despliegue/
+  Dockerfile.backend     # Node 20 (compartido por v1 y v2)
+  Dockerfile.frontend    # Vite + Nginx, dos etapas (compartido)
+  v1/                    # Código de la Tarea 4
+  v2/                    # Código de la Tarea 5
+  recreate/              # Estrategia 1
+  bluegreen/             # Estrategia 2
+  canary/                # Estrategia 3
 ```
 
-- **Firma del token** (`controllers/authController.js`): al iniciar sesión se genera el token con `jwt.sign`, con payload `{ id, email, role }` y expiración tomada de `JWT_EXPIRES_IN` (5 minutos):
+## Requisitos
 
-```javascript
-  jwt.sign(
-    { id: usuario._id, email: usuario.correo, role: usuario.rol },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN }
-  );
+- Docker con Docker Compose v2 (probado con Docker 28.0.1 y Compose v2.33.1)
+- Git
+- Puerto **8080** libre (y el **8081** para Blue-Green). Se ejecuta una estrategia a la vez.
+
+## 1. Clonar
+
+```bash
+git clone https://github.com/David21P/Desarrollo_Web.git
+cd Desarrollo_Web
+git checkout Tarea6
 ```
 
-- **Middleware reutilizable** (`middleware/authMiddleware.js`): lee el encabezado `Authorization: Bearer <token>` y verifica el token con `jwt.verify`.
-  - Sin encabezado o sin token: **401** `token_requerido`.
-  - Token vencido (`TokenExpiredError`): **401** con el JSON:
+## 2. Construir las imágenes
 
-```json
-    {
-      "error": "token_expired",
-      "message": "La sesión ha expirado o ya no es válida. Por favor, inicie sesión nuevamente."
-    }
+Desde la raíz del repositorio:
+
+```bash
+docker build -f despliegue/Dockerfile.backend --build-arg APP_VERSION=v1 -t ferreteria-api:v1 despliegue/v1/backend
+docker build -f despliegue/Dockerfile.backend --build-arg APP_VERSION=v2 -t ferreteria-api:v2 despliegue/v2/backend
+docker build -f despliegue/Dockerfile.frontend -t ferreteria-web:v1 despliegue/v1
+docker build -f despliegue/Dockerfile.frontend -t ferreteria-web:v2 despliegue/v2
+docker images
 ```
 
-  - Token inválido: **401** `token_invalido`.
+## 3. Credenciales
 
-- **Rutas protegidas** (`routes/productoRoutes.js`): `POST`, `PUT` y `DELETE` de productos usan el middleware. Los `GET` quedan públicos para consultar el catálogo.
+**El repositorio no contiene contraseñas ni tokens.** El `JWT_SECRET` se entrega en tiempo de ejecución desde un archivo `.env` local, que está en el `.gitignore`.
 
-### Frontend
+En la carpeta de la estrategia que vayas a ejecutar crea un archivo `.env`:
 
-- **Almacenamiento del token:** al iniciar sesión, el usuario y su token se guardan en `localStorage` (clave `usuario`) y en el estado global (`AuthContext` con `useReducer`). Al recargar la página la sesión se conserva.
-- **Cliente HTTP centralizado** (`src/api/apiClient.js`): la función `apiFetch` agrega automáticamente `Authorization: Bearer <token>` a todas las peticiones a la API.
-- **Interceptor global de respuestas 401:** si la API responde 401, `apiFetch` borra el token y los datos del usuario de `localStorage` y emite el evento `sesion-expirada`.
-- **Cierre de sesión y redirección:** el `AuthProvider` escucha ese evento, ejecuta `dispatch({ type: "SESION_EXPIRADA" })` (equivalente a LOGOUT, con mensaje) y redirige a `/login` con `useNavigate`. La pantalla de login muestra un `Alert` con el texto: *"Su sesión ya no es válida o ha caducado. Por favor, inicie sesión nuevamente."*
+```
+JWT_SECRET=<clave larga y aleatoria>
+```
 
-## Endpoints disponibles
+Ejemplo para generar la clave:
 
-| Método | Ruta | Acceso | Descripción |
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
+
+En `recreate/` puedes copiar `.env.example` como punto de partida. Si falta `JWT_SECRET`, Compose se detiene con un mensaje claro.
+
+## 4. Estrategias
+
+Cada una se ejecuta desde su carpeta. Para verificar que responde:
+
+```bash
+curl http://localhost:8080/api/version
+```
+
+y abre `http://localhost:8080` en el navegador.
+
+### Estrategia 1: Recreate (`despliegue/recreate`)
+
+Se detiene la versión actual y se levanta la nueva en su lugar. **Hay una caída** durante el cambio (≈ 15 s medidos).
+
+| Acción | Comando |
+|---|---|
+| Iniciar v1 | `VERSION=v1 docker compose up -d` |
+| Actualizar a v2 | `VERSION=v2 docker compose up -d` |
+| Rollback a v1 | `VERSION=v1 docker compose up -d` |
+| Estado | `docker compose ps` |
+| Detener | `docker compose down` |
+
+En PowerShell: `$env:VERSION="v1"; docker compose up -d`.
+
+### Estrategia 2: Blue-Green (`despliegue/bluegreen`)
+
+Dos entornos completos: **blue** (v1, producción) y **green** (v2). Green se prueba en el puerto **8081** y luego se cambia el tráfico con un cambio de archivo y una recarga de Nginx. **Sin caída** en las pruebas.
+
+| Acción | Comando |
+|---|---|
+| Iniciar blue | `docker compose up -d mongo api-blue web-blue gateway` |
+| Preparar green | `docker compose up -d api-green web-green` |
+| Probar green | `curl http://localhost:8081/api/version` |
+| Cambiar a green | `cp gateway/green.inc gateway/active.inc && docker compose exec gateway nginx -s reload` |
+| Rollback a blue | `cp gateway/blue.inc gateway/active.inc && docker compose exec gateway nginx -s reload` |
+| Detener | `docker compose down` |
+
+En PowerShell: `Copy-Item gateway\green.inc gateway\active.inc -Force`.
+
+### Estrategia 3: Canary (`despliegue/canary`)
+
+Nginx reparte las peticiones de `/api/` entre v1 y v2 con `split_clients`. Se sube el porcentaje de forma gradual: 10 %, 50 % y 100 %. Solo se reparte la API; la interfaz se mantiene en v1.
+
+| Acción | Comando |
+|---|---|
+| Iniciar (10 % a v2) | `docker compose up -d` |
+| Validar configuración | `docker compose exec gateway nginx -t` |
+| Medir el reparto | `curl` repetido a `/api/version` (ver abajo) |
+| Subir al 50 % | `cp gateway/canary50.inc gateway/active.inc && docker compose exec gateway nginx -s reload` |
+| Promover al 100 % | `cp gateway/canary100.inc gateway/active.inc && docker compose exec gateway nginx -s reload` |
+| Rollback (0 % a v2) | `cp gateway/canary0.inc gateway/active.inc && docker compose exec gateway nginx -s reload` |
+| Detener | `docker compose down` |
+
+Medir el reparto en PowerShell (100 peticiones):
+
+```powershell
+1..100 | ForEach-Object { (Invoke-RestMethod http://localhost:8080/api/version).version } | Group-Object | Select-Object Name, Count
+```
+
+## Resultados
+
+| Estrategia | Caída al actualizar | Rollback | Recursos |
 |---|---|---|---|
-| POST | `/api/auth/register` | Público | Registrar usuario |
-| POST | `/api/auth/login` | Público | Iniciar sesión y obtener JWT |
-| GET | `/api/recursos` | Público | Listar productos (`?categoria=`, `?nombre=`) |
-| GET | `/api/recursos/:id` | Público | Obtener un producto |
-| POST | `/api/recursos` | **Protegido (JWT)** | Crear producto |
-| PUT | `/api/recursos/:id` | **Protegido (JWT)** | Actualizar producto |
-| DELETE | `/api/recursos/:id` | **Protegido (JWT)** | Eliminar producto |
+| Recreate | ≈ 15 s | ≈ 11,5 s (con caída) | 4 contenedores |
+| Blue-Green | Ninguna observada | Instantáneo | 6 contenedores |
+| Canary | Ninguna observada | Instantáneo | 5 contenedores |
 
-El rol del usuario viaja dentro del token; la autorización por rol (por ejemplo, solo `admin` puede modificar productos) queda como mejora futura.
+Reparto medido en Canary (100 peticiones): 10 % → 86 v1 / 14 v2, 50 % → 55 v1 / 45 v2, 100 % → 0 v1 / 100 v2.
 
-## Arquitectura del backend
+## Limitaciones principales
 
+- **Recreate:** hay caída y no se puede probar la versión nueva antes de exponerla.
+- **Blue-Green:** duplica recursos y comparte la base de datos entre ambos entornos; el cambio es total.
+- **Canary:** el reparto es estadístico y por petición (sin afinidad por usuario). Como v1 no envía token y v2 lo exige, durante el canary algunas peticiones de v1 pueden recibir `401`.
+
+El detalle, con capturas de cada paso, está en el manual técnico (Word) entregado junto con esta tarea.
+
+## Detener y limpiar
+
+```bash
+docker compose down        # conserva los datos de MongoDB
+docker compose down -v     # también borra el volumen
 ```
-backend/
-├── config/
-│   └── db.js                  # Conexión a MongoDB
-├── models/
-│   ├── User.js                # Esquema de usuario
-│   └── Producto.js            # Esquema de producto
-├── controllers/
-│   ├── authController.js      # Registro e inicio de sesión (emite el JWT)
-│   └── productoController.js  # Lógica CRUD de productos
-├── middleware/
-│   └── authMiddleware.js      # Verificación del JWT (Bearer)
-├── routes/
-│   ├── authRoutes.js          # Rutas /api/auth
-│   └── productoRoutes.js      # Rutas /api/recursos
-├── server.js                  # Punto de entrada
-├── .env.example               # Plantilla de variables de entorno
-└── ferreteria-api-tarea5.postman_collection.json
-```
-
-## Colección de Postman
-
-Archivo: `backend/ferreteria-api-tarea5.postman_collection.json` (importar en Postman). Incluye las requests de la Tarea 4 y tres nuevas:
-
-1. **Tarea5 - Login (obtener token):** hace login y guarda el token en la variable `token` de la colección (script post-response).
-2. **Tarea5 - Crear producto (token válido):** `POST /api/recursos` con `Authorization: Bearer {{token}}`. Responde **201**.
-3. **Tarea5 - Crear producto (token expirado 401):** la misma petición enviada **más de 5 minutos después** del login. Responde **401** con `token_expired` (incluye un ejemplo guardado con la respuesta).
-
-Para repetir la prueba: ejecutar el login, esperar 5 minutos sin volver a hacer login y enviar la request 3.
-
-## Cómo probar en el sitio publicado
-
-1. Entrar a **Productos** sin sesión: la lista carga (GET público).
-2. Intentar **Agregar producto** sin sesión: redirige a `/login` con el aviso de sesión no válida.
-3. Iniciar sesión con las credenciales de prueba y agregar un producto: se guarda correctamente.
-4. Esperar 5 minutos e intentar guardar otro: la sesión se cierra y se redirige a `/login` con el mensaje de sesión caducada.
-
-## Tecnologías utilizadas
-
-- **Backend:** Node.js, Express, MongoDB Atlas, Mongoose, bcryptjs, jsonwebtoken, dotenv, cors.
-- **Frontend:** React, Vite, React Router, React-Bootstrap, Context API + useReducer.
-- **Despliegue:** Render (backend) y Netlify (frontend).
-
-## Credenciales de prueba
-
-- Correo: `javier@correo.com`
-- Contraseña: `123456`
-
-
-Javier Pirir | 9490-22-15282 | David21P 
-Trabajo individual: backend (login con JWT, middleware de autenticación, protección de rutas), frontend (almacenamiento del token, cliente HTTP centralizado, interceptor 401, redirección), despliegue en Render y Netlify, colección de Postman y documentación. |
